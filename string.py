@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+#	将工程中多语言LocalizedString(@"key")中的key取出并写入本地文件
+
+
 import os
 
 
@@ -24,20 +27,29 @@ def readFile(path):
     str = os.path.splitext(path)[1]
 
     if str == '.m' or str == '.h':
+    	#文件名
+    	fileName = os.path.split(path)[1]
+    	fileName = os.path.splitext(fileName)[0]
+
+    	stringList = []
+    	if fileName in aimDic:
+    		stringList = aimDic[fileName]
+
     	with open(path,'r') as f:
     		#读操作
     		rows = f.readlines()
     		for row in rows:
     			if ('LocalizedString' in row) and ('AMLocalizedString' in row) == False:
-    				cutString(row)
+    				cutString(row,stringList)
 
+    	if len(stringList) > 0:
+    		aimDic[fileName] = stringList
+    		print(' ----- ' + fileName + ' ----- ')
 
-#全局dic，存储所有key，达到去重的目的
-dic = {}
 
 
 #截取目标字符串，保存在dic中，利用dic去重
-def cutString(string):
+def cutString(string,stringList):
 	string = string.strip()		#去除\n
 	string = string.lstrip()	#去除左边空格
 
@@ -51,25 +63,32 @@ def cutString(string):
 			tmp = subParts[0]
 			subParts = tmp.split('(@"')
 			tmp = subParts[1]
-			dic[tmp] = tmp      #key和value相同，存储在dic中
+			if not tmp in tmpDic:
+				stringList.append(tmp)
+				tmpDic[tmp] = tmp
 
 
 #将dic中的key-value写入文件
-def writeToFile(dic,path):
+def writeToFile(dic,path,strCount,fileCount):
     #设置文件名
 	path = path + '/' + 'aimString.txt'
 	#获取唯一的文件名
 	path = newFilePath(path)
 
 	with open(path,'w') as f:
-		for (key,val) in dic.items():
-			# eg. "没有绑定银行卡" = "没有绑定银行卡";
-			string = '"' + key + '"' + ' = ' + '"' + val + '"' + ';' + '\n'
-			#写操作
+		for (key,strList) in dic.items():
+			string = '\n\n\n//------------ ' + key + ' ------------\n\n\n\n'
 			f.write(string)
+
+			strList.sort(key=lambda x:len(x),reverse=False)
+			for string in strList:
+				# eg. "没有绑定银行卡" = "没有绑定银行卡";
+				string = '"' + string + '"' + ' = ' + '"' + string + '"' + ';' + '\n'
+				#写操作
+				f.write(string)
                 
 	#写操作结束
-	print(len(dic),"条数据已写入",path)
+	print("共",fileCount,"个文件",strCount,"条数据，已写入：",path)
 
 
 #获取唯一的文件名
@@ -93,8 +112,12 @@ print('...')
 print('...')
 
 path = path.rstrip()	#去除右边空格
+#全局dic，存储所有key，达到去重的目的
+tmpDic = {} 	
+#全局dic，存储每个文件及其对应的目标字符串
+aimDic = {}
 traverse(path)
-writeToFile(dic,path)
+writeToFile(aimDic,path,len(tmpDic),len(aimDic))
 
 print('🚀')
 print('🚀🚀')
