@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
-#	将工程中多语言LocalizedString(@"key")中的key取出并写入本地文件
+#
+#	遍历工程中的所有文件，将多语言LocalizedString(@"key")中的key取出并写入本地文件
+#	
 
 
 import os
+import time
 
 
 #递归遍历文件夹
@@ -39,7 +42,7 @@ def readFile(path):
     		#读操作
     		rows = f.readlines()
     		for row in rows:
-    			if ('LocalizedString' in row) and ('AMLocalizedString' in row) == False:
+    			if 'LocalizedString' in row:
     				cutString(row,stringList)
 
     	if len(stringList) > 0:
@@ -76,15 +79,17 @@ def writeToFile(dic,path,strCount,fileCount):
 	path = newFilePath(path)
 
 	with open(path,'w') as f:
+		#写入时间
+		f.write('//创建时间 '+time.strftime("%Y/%m/%d %H:%M:%S", time.localtime()))
+
 		for (key,strList) in dic.items():
-			string = '\n\n\n//------------ ' + key + ' ------------\n\n\n\n'
+			string = '\n\n\n//------------ ' + key + ' ------------\n\n'
 			f.write(string)
 
 			strList.sort(key=lambda x:len(x),reverse=False)
 			for string in strList:
 				# eg. "没有绑定银行卡" = "没有绑定银行卡";
 				string = '"' + string + '"' + ' = ' + '"' + string + '"' + ';' + '\n'
-				#写操作
 				f.write(string)
                 
 	#写操作结束
