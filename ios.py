@@ -83,7 +83,7 @@ def writeToFile(dic,path,strCount,fileCount):
 		f.write('//创建时间 '+time.strftime("%Y/%m/%d %H:%M:%S", time.localtime()))
 
 		for (key,strList) in dic.items():
-			string = '\n\n\n//------------ ' + key + ' ------------\n\n'
+			string = '\n\n//------------ ' + key + ' ------------\n\n'
 			f.write(string)
 
 			strList.sort(key=lambda x:len(x),reverse=False)
