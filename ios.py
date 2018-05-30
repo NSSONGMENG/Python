@@ -10,7 +10,7 @@ import time
 
 
 #递归遍历文件夹
-def traverse(path):
+def traverse_path(path):
 	fileList = os.listdir(path)
 
 	for f in fileList:
@@ -18,14 +18,14 @@ def traverse(path):
 
 		if os.path.isfile(filePath):
 			#文件
-			readFile(filePath)
+			read_file(filePath)
 		else:
 			#递归遍历路径
-			traverse(filePath)
+			traverse_path(filePath)
 
 
 #读取文件
-def readFile(path):
+def read_file(path):
     #仅仅对.h和.m文件进行操作
     str = os.path.splitext(path)[1]
 
@@ -43,7 +43,7 @@ def readFile(path):
     		rows = f.readlines()
     		for row in rows:
     			if 'LocalizedString' in row:
-    				cutString(row,stringList)
+    				cut_string(row,stringList)
 
     	if len(stringList) > 0:
     		aimDic[fileName] = stringList
@@ -52,7 +52,7 @@ def readFile(path):
 
 
 #截取目标字符串，保存在dic中，利用dic去重
-def cutString(string,stringList):
+def cut_string(string,stringList):
 	string = string.strip()		#去除\n
 	string = string.lstrip()	#去除左边空格
 
@@ -72,17 +72,17 @@ def cutString(string,stringList):
 
 
 #将dic中的key-value写入文件
-def writeToFile(dic,path,strCount,fileCount):
+def write_key_to_file(path,fileName):
     #设置文件名
-	path = path + '/' + 'aimString.txt'
+	path = path + '/' + fileName
 	#获取唯一的文件名
-	path = newFilePath(path)
+	path = new_file_path(path)
 
 	with open(path,'w') as f:
 		#写入时间
 		f.write('//创建时间 '+time.strftime("%Y/%m/%d %H:%M:%S", time.localtime()))
 
-		for (key,strList) in dic.items():
+		for (key,strList) in aimDic.items():
 			string = '\n\n//------------ ' + key + ' ------------\n\n'
 			f.write(string)
 
@@ -93,11 +93,11 @@ def writeToFile(dic,path,strCount,fileCount):
 				f.write(string)
                 
 	#写操作结束
-	print("共",fileCount,"个文件",strCount,"条数据，已写入：",path)
+	print("共",len(aimDic),"个文件",len(tmpDic),"条数据，已写入：",path)
 
 
 #获取唯一的文件名
-def newFilePath(path):
+def new_file_path(path):
 	i = 1
 	aimPath = path
     
@@ -117,12 +117,11 @@ print('...')
 print('...')
 
 path = path.rstrip()	#去除右边空格
-#全局dic，存储所有key，达到去重的目的
-tmpDic = {} 	
-#全局dic，存储每个文件及其对应的目标字符串
-aimDic = {}
-traverse(path)
-writeToFile(aimDic,path,len(tmpDic),len(aimDic))
+tmpDic = {} 	#全局dic，存储所有key，达到去重的目的
+aimDic = {}		#全局dic，存储每个文件及其对应的目标字符串
+
+traverse_path(path)
+write_key_to_file(path,'aimString.txt')
 
 print('🚀')
 print('🚀🚀')
